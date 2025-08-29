@@ -41,7 +41,7 @@ export default function Page() {
         </main>
       </div>
 
-      <div className="absolute inset-x-0 z-0 top-[20vh] md:top-[70vh]">
+      <div className="absolute inset-x-0 z-0 top-[20vh] md:top-[75vh]">
   <CurvedLinesPattern />
 </div>
 
