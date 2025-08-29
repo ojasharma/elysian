@@ -25,7 +25,7 @@ export default function ThreeScene({ children }: { children: React.ReactNode }) 
           <ambientLight intensity={1.5} />
           <Environment preset="sunset" />
           <Model />
-          <OrbitControls enableZoom={false} />
+     
         </Canvas>
       </div>
     </>

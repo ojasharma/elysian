@@ -1,6 +1,6 @@
 // app/page.tsx
 import HeroText from "@/components/herotext";
-import ThreeScene from "@/components/ThreeScene"; // Import the new component
+import ThreeScene from "@/components/ThreeScene";
 
 export default function Page() {
   return (
@@ -18,7 +18,7 @@ export default function Page() {
           <img
             src="/user.png"
             alt="User"
-            className="w-6 h-6 md:w-9 md:h-9"
+            className="w-6 h-8 md:w-9 md-h-11"
           />
           <img
             src="/cart.png"
@@ -28,9 +28,11 @@ export default function Page() {
         </div>
       </header>
 
-      {/* This main area will contain the 3D scene and the text */}
-      {/* 'relative' is crucial for positioning the scene correctly inside it */}
-      <main className="relative flex-1">
+      {/* Added a negative top margin here.
+        You can change -mt-20 to a different value like -mt-16 or -mt-24 
+        to adjust how high you want to move it.
+      */}
+      <main className="relative flex-1 -mt-30">
         <ThreeScene>
           <HeroText />
         </ThreeScene>
