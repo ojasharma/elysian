@@ -8,10 +8,9 @@ Title: Low Poly Jigsaw Puzzle Pieces
 */
 
 import * as THREE from 'three';
-// Import useRef for mesh references, useMemo to calculate random values once, and useFrame for animation
-import React, { ComponentProps, useRef, useMemo } from 'react';
+import React, { ComponentProps, useRef, useMemo, useState, useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber'; // <-- Import the useFrame hook
+import { useFrame } from '@react-three/fiber';
 import { GLTF } from 'three-stdlib';
 
 type GLTFResult = GLTF & {
@@ -31,58 +30,79 @@ type GLTFResult = GLTF & {
   };
 };
 
+// Custom hook to check if the screen is mobile-sized
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, [breakpoint]);
+
+  return isMobile;
+};
+
+
 export function Model(props: ComponentProps<'group'>) {
   const { nodes, materials } = useGLTF('/model.glb') as unknown as GLTFResult;
-
-  // STEP 1: Create a ref object to hold references to our meshes
+  const isMobile = useIsMobile();
   const meshRefs = useRef<{ [key: string]: THREE.Mesh | null }>({});
 
-  // STEP 2: Use useMemo to define the puzzle pieces configuration
-  // This ensures the random speeds are generated only once.
   const puzzlePieces = useMemo(
     () => [
       {
         name: 'Piece_2',
         geometry: nodes.Puzzle_Piece_2_008802_0.geometry,
         material: materials['008802'],
-        position: [190, 200, 0] as [number, number, number],
-        // Add a new property for randomized rotation speed [x, y, z]
-        // (Math.random() - 0.5) gives a value between -0.5 and 0.5 for rotation in both directions
+        position: isMobile
+          ? ([100,100, 0] as [number, number, number])
+          : ([190, 200, 0] as [number, number, number]),
+        // NEW: Add a scale property. 1 is default size, 0.8 is 80% of the size.
+        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
         name: 'Piece_3',
         geometry: nodes.Puzzle_Piece_3_D31E29_0.geometry,
         material: materials.D31E29,
-        position: [240, -190, 0] as [number, number, number],
+        position: isMobile
+          ? ([120, -85, 0] as [number, number, number])
+          : ([240, -190, 0] as [number, number, number]),
+        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
         name: 'Piece_4',
         geometry: nodes.Puzzle_Piece_4_1E5AD8_0.geometry,
         material: materials['1E5AD8'],
-        position: [-290, -200, 0] as [number, number, number],
+        position: isMobile
+          ? ([-120, -90, 0] as [number, number, number])
+          : ([-240, -200, 0] as [number, number, number]),
+        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
         name: 'Piece_5',
         geometry: nodes.Puzzle_Piece_5_FFC107_0.geometry,
         material: materials.FFC107,
-        position: [-160, 210, 0] as [number, number, number],
+        position: isMobile
+          ? ([-90, 100, 0] as [number, number, number])
+          : ([-160, 210, 0] as [number, number, number]),
+        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
     ],
-    [nodes, materials]
+    [nodes, materials, isMobile]
   );
 
-  // STEP 3: Use the useFrame hook for animation
   useFrame((state, delta) => {
-    // Loop through each piece on every frame
     puzzlePieces.forEach((piece) => {
       const mesh = meshRefs.current[piece.name];
       if (mesh) {
-        // Update the rotation on each axis
-        // 'delta' ensures the animation is smooth regardless of frame rate
         mesh.rotation.x += piece.rotationSpeed[0] * delta;
         mesh.rotation.y += piece.rotationSpeed[1] * delta;
         mesh.rotation.z += piece.rotationSpeed[2] * delta;
@@ -96,12 +116,11 @@ export function Model(props: ComponentProps<'group'>) {
         {puzzlePieces.map((piece) => (
           <mesh
             key={piece.name}
-            // STEP 4: Assign the ref to the mesh element
             ref={(el) => (meshRefs.current[piece.name] = el)}
             geometry={piece.geometry}
             material={piece.material}
             position={piece.position}
-            // We no longer need the static rotation prop here, as useFrame is controlling it
+            scale={piece.scale} // <-- Add the scale prop here
           />
         ))}
       </group>
