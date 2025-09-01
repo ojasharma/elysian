@@ -35,7 +35,7 @@ const PuzzleOverlay: React.FC<PuzzleOverlayProps> = ({ isOpen, gridSize = 12 }) 
       style={{
         gridTemplateColumns: `repeat(${numCols}, 1fr)`,
         gridTemplateRows: `repeat(${numRows}, 1fr)`,
-        minHeight: '110vh',
+        minHeight: '100vh',
         minWidth: '100vw',
       }}
     >
