@@ -62,7 +62,7 @@ export function Model(props: ComponentProps<'group'>) {
           ? ([100,100, 0] as [number, number, number])
           : ([500, 180, 0] as [number, number, number]),
         // NEW: Add a scale property. 1 is default size, 0.8 is 80% of the size.
-        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
+        scale: isMobile ? 0.3 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
@@ -72,7 +72,7 @@ export function Model(props: ComponentProps<'group'>) {
         position: isMobile
           ? ([120, -85, 0] as [number, number, number])
           : ([500, -180, 0] as [number, number, number]),
-        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
+        scale: isMobile ? 0.3 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
@@ -82,7 +82,7 @@ export function Model(props: ComponentProps<'group'>) {
         position: isMobile
           ? ([-120, -90, 0] as [number, number, number])
           : ([-500, -170, 0] as [number, number, number]),
-        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
+        scale: isMobile ? 0.3 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
       {
@@ -92,7 +92,7 @@ export function Model(props: ComponentProps<'group'>) {
         position: isMobile
           ? ([-90, 100, 0] as [number, number, number])
           : ([-500, 180, 0] as [number, number, number]),
-        scale: isMobile ? 0.5 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
+        scale: isMobile ? 0.3 : 1, // <-- CHANGE MOBILE/DESKTOP SIZE HERE
         rotationSpeed: [(Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.5] as const,
       },
     ],
