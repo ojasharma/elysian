@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
-// Import the font objects directly. They are NOT functions to be called.
+// Import Inter font from next/font/google
+import { Inter } from "next/font/google";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import "./globals.css";
+
+// Initialize Inter with variable
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -16,12 +23,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/*
-        The .variable property is accessed directly from the imported font objects.
-        This adds the CSS variables like '--font-geist-sans' to the html tag.
-      */}
       <body
-        className={`${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
+        className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} font-sans antialiased`}
       >
         {children}
       </body>

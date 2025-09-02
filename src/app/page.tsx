@@ -5,6 +5,7 @@ import ThreeScene from "@/components/ThreeScene";
 import Ribbon from "@/components/tape";
 import CurvedLinesPattern from "@/components/CurvedLinesPattern";
 import Header from "@/components/Header";
+import PuzzleButton from "@/components/PuzzleButton"; // import your button
 
 export default function Page() {
   return (
@@ -19,7 +20,10 @@ export default function Page() {
 
         <main className="relative flex-1 -mt-70 md:-mt-20 z-10">
           <ThreeScene>
-            <HeroText />
+            <div className="flex flex-col items-center gap-6">
+              <HeroText />
+              <PuzzleButton /> {/* ✅ button just below HeroText */}
+            </div>
           </ThreeScene>
         </main>
       </div>

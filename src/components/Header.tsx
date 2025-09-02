@@ -12,7 +12,9 @@ type PuzzleOverlayProps = {
 
 const menuItems = [
   { name: "HOME", href: "/" },
-  { name: "CUSTOM PUZZLES", href: "/custom-puzzles" },
+  { name: "PUZZLES FOR HER/HIM", href: "/custom-puzzles" },
+  { name: "FAMILY PUZZLES", href: "/family-puzzles" }, // Added this line
+  { name: "KIDS PUZZLES", href: "/kid-puzzles" },       // Added this line
   { name: "ABOUT US", href: "/about" },
   { name: "CONTACT US", href: "/contact" },
 ];

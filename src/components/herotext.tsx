@@ -5,7 +5,7 @@ export default function HeroText() {
       className="text-5xl md:text-8xl font-bold text-[#087b08] text-center"
       style={{ fontFamily: 'Groove, sans-serif' }}
     >
-      Make <br /> Custom Puzzles <br /> For Your <br /> Loved Ones!
+      Make <br /> Personalized Puzzles <br /> For Your <br /> Loved Ones!
     </h1>
   );
 }
