@@ -1,0 +1,28 @@
+// prisma/schema.prisma
+
+// This tells Prisma what database you're using.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// This tells Prisma to generate the client code for TypeScript.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// This is our User model. It will become the 'users' table in the database.
+model User {
+  id            String    @id @default(cuid()) // Unique ID for the user
+  email         String    @unique // User's email, must be unique
+  name          String
+  password      String    // The SECURELY HASHED password, never plain text
+
+  // Fields for email verification with OTP
+  otp           String?   // The One-Time Password, nullable (optional)
+  otpExpiry     DateTime? // When the OTP expires, nullable
+  isVerified   Boolean   @default(false)
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
