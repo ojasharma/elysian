@@ -2,15 +2,142 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from 'next/navigation'; // Import for redirection
 
 const AuthForm: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const router = useRouter();
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    console.log(`Submitting as ${isLogin ? "Login" : "Sign Up"}`);
+  // Form state
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+
+  // UI feedback state
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleToggleForm = () => {
+    setIsLogin(!isLogin);
+    setError(null);
+    setSuccess(null);
   };
 
+  // --- Main Form Submission (Login / Signup) ---
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    if (isLogin) {
+      // --- Login Logic (Requires a '/api/auth/login' endpoint) ---
+      // This is a placeholder for your login logic.
+      console.log("Submitting as Login");
+      setError("Login functionality is not yet implemented.");
+      setIsLoading(false);
+    } else {
+      // --- Sign Up Logic ---
+      try {
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Something went wrong!');
+        }
+        
+        setSuccess(data.message);
+        setShowOtpInput(true); // Switch to OTP view on success
+
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  // --- OTP Verification Submission ---
+  const handleVerifyOtp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+    
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'OTP verification failed.');
+      }
+
+      setSuccess(data.message);
+      // Redirect to a protected page (e.g., dashboard) after a short delay
+      setTimeout(() => {
+        router.push('/dashboard'); 
+      }, 2000);
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  // --- Render OTP Verification Form ---
+  if (showOtpInput) {
+    return (
+       <div className="flex items-center justify-center p-4 font-inter">
+        <div className="w-full max-w-md space-y-8">
+            <div className="text-center">
+                <h2 className="text-3xl font-bold text-gray-900">Verify Your Email</h2>
+                <p className="mt-2 text-sm text-gray-600">
+                    An OTP has been sent to <strong>{email}</strong>
+                </p>
+            </div>
+             <div className="rounded-lg bg-white p-8 shadow-lg">
+                <form className="space-y-6" onSubmit={handleVerifyOtp}>
+                    <input
+                        type="text"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        placeholder="Enter 6-digit OTP"
+                        required
+                        className="text-black w-full rounded-md border border-gray-300 px-3 py-2 placeholder:text-gray-500 focus:border-[#087b08] focus:ring-1 focus:ring-[#087b08]"
+                    />
+                    {/* Feedback Messages */}
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                    {success && <p className="text-sm text-green-600">{success}</p>}
+                    <button
+                        type="submit"
+                        disabled={isLoading}
+                        className="w-full rounded-md bg-[#087b08] py-2 px-4 font-semibold text-white transition-colors hover:bg-[#065c06] disabled:bg-gray-400"
+                    >
+                        {isLoading ? "Verifying..." : "Verify Account"}
+                    </button>
+                </form>
+            </div>
+        </div>
+       </div>
+    );
+  }
+
+  // --- Render Main Login/Signup Form ---
   return (
     <div className="flex items-center justify-center p-4 font-inter">
       <div className="w-full max-w-md space-y-8">
@@ -21,7 +148,7 @@ const AuthForm: React.FC = () => {
           <p className="mt-2 text-sm text-gray-600">
             {isLogin ? "Or " : ""}
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={handleToggleForm}
               className="font-medium text-[#087b08] hover:text-[#065c06]"
             >
               {isLogin ? "create an account" : "sign in to your account"}
@@ -35,6 +162,8 @@ const AuthForm: React.FC = () => {
             {!isLogin && (
               <input
                 type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder="Name"
                 required
                 className="text-black w-full rounded-md border border-gray-300 px-3 py-2 placeholder:text-gray-500 focus:border-[#087b08] focus:ring-1 focus:ring-[#087b08]"
@@ -43,13 +172,17 @@ const AuthForm: React.FC = () => {
 
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
               className="text-black w-full rounded-md border border-gray-300 px-3 py-2 placeholder:text-gray-500 focus:border-[#087b08] focus:ring-1 focus:ring-[#087b08]"
             />
             <input
               type="password"
-              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={isLogin ? "Password" : "Create Password"}
               required
               className="text-black w-full rounded-md border border-gray-300 px-3 py-2 placeholder:text-gray-500 focus:border-[#087b08] focus:ring-1 focus:ring-[#087b08]"
             />
@@ -61,15 +194,21 @@ const AuthForm: React.FC = () => {
                 </a>
               </div>
             )}
+            
+            {/* Feedback Messages */}
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            {success && <p className="text-sm text-green-600">{success}</p>}
 
             <button
               type="submit"
-              className="w-full rounded-md bg-[#087b08] py-2 px-4 font-semibold text-white transition-colors hover:bg-[#065c06]"
+              disabled={isLoading}
+              className="w-full rounded-md bg-[#087b08] py-2 px-4 font-semibold text-white transition-colors hover:bg-[#065c06] disabled:bg-gray-400"
             >
-              {isLogin ? "Sign In" : "Create Account"}
+              {isLoading ? "Processing..." : (isLogin ? "Sign In" : "Create Account")}
             </button>
           </form>
 
+          {/* Social Logins */}
           <div className="mt-6">
             <div className="relative flex items-center">
               <div className="w-full border-t border-gray-300" />
@@ -77,8 +216,8 @@ const AuthForm: React.FC = () => {
                 Or continue with
               </span>
             </div>
-
             <div className="mt-6 grid grid-cols-2 gap-3">
+              {/* Add onClick handlers for social logins if needed */}
               <button className="flex items-center justify-center rounded-md border bg-gray-100 py-2 px-4 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-200">
                 <Image src="/google.png" alt="Google logo" width={20} height={20} />
                 <span className="ml-2">Google</span>
