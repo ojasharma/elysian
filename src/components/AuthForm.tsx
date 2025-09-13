@@ -34,8 +34,7 @@ const AuthForm: React.FC = () => {
     setSuccess(null);
 
     if (isLogin) {
-      // --- Login Logic (Requires a '/api/auth/login' endpoint) ---
-      // This is a placeholder for your login logic.
+      // --- Login Logic ---
       console.log("Submitting as Login");
       setError("Login functionality is not yet implemented.");
       setIsLoading(false);
@@ -57,8 +56,13 @@ const AuthForm: React.FC = () => {
         setSuccess(data.message);
         setShowOtpInput(true); // Switch to OTP view on success
 
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        // ✅ FIX: Properly handle the error type
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred.');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -86,13 +90,18 @@ const AuthForm: React.FC = () => {
       }
 
       setSuccess(data.message);
-      // Redirect to a protected page (e.g., dashboard) after a short delay
+      // Redirect after a short delay
       setTimeout(() => {
         router.push('/dashboard'); 
       }, 2000);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      // ✅ FIX: Properly handle the error type
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred during OTP verification.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -217,7 +226,6 @@ const AuthForm: React.FC = () => {
               </span>
             </div>
             <div className="mt-6 grid grid-cols-2 gap-3">
-              {/* Add onClick handlers for social logins if needed */}
               <button className="flex items-center justify-center rounded-md border bg-gray-100 py-2 px-4 text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-200">
                 <Image src="/google.png" alt="Google logo" width={20} height={20} />
                 <span className="ml-2">Google</span>
