@@ -1,6 +1,5 @@
-// app/api/auth/[...nextauth]/route.ts
-
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { DefaultSession, NextAuthOptions } from "next-auth";
+import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -58,16 +57,18 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      // On the first sign-in, the user object is available.
+      // Persist the user ID to the token.
       if (user) {
         token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
+      // Pass the user ID from the token to the session object.
+      // ✅ FIX: No more 'as any'. TypeScript now knows about session.user.id
       if (token && session.user) {
-        // The type definition for session.user in v4 might not have `id`
-        // So we cast it to allow adding the property.
-        (session.user as any).id = token.id;
+        session.user.id = token.id;
       }
       return session;
     },
