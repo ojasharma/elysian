@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { useRouter } from 'next/navigation'; // Import for redirection
+import { useRouter } from 'next/navigation'; 
+import { signIn } from 'next-auth/react'; 
 
 const AuthForm: React.FC = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [showOtpInput, setShowOtpInput] = useState(false);
-  const router = useRouter();
+  const router = useRouter(); 
 
   // Form state
   const [name, setName] = useState("");
@@ -24,47 +25,58 @@ const AuthForm: React.FC = () => {
     setIsLogin(!isLogin);
     setError(null);
     setSuccess(null);
+    setShowOtpInput(false);
   };
 
   // --- Main Form Submission (Login / Signup) ---
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
     setSuccess(null);
+    setIsLoading(true);
 
     if (isLogin) {
-      // --- Login Logic ---
-      console.log("Submitting as Login");
-      setError("Login functionality is not yet implemented.");
-      setIsLoading(false);
-    } else {
-      // --- Sign Up Logic ---
+      // --- SIGN-IN LOGIC ---
       try {
-        const response = await fetch('/api/auth/signup', {
+        const result = await signIn('credentials', {
+          redirect: false,
+          email: email,
+          password: password,
+        });
+
+        if (result?.error) {
+          setError(result.error);
+        } else if (result?.ok) {
+          router.push('/test');
+        }
+      } catch (err) {
+        setError("An unexpected error occurred during login.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      // --- SIGN-UP LOGIC ---
+      setShowOtpInput(true);
+      setIsLoading(false); 
+
+      try {
+        const response = await fetch('/api/user/signup', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, password }),
         });
-
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.message || 'Something went wrong!');
+          throw new Error(data.message || 'Sign up failed.');
         }
-        
-        setSuccess(data.message);
-        setShowOtpInput(true); // Switch to OTP view on success
-
       } catch (err) {
-        // ✅ FIX: Properly handle the error type
+        setShowOtpInput(false);
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError('An unexpected error occurred.');
+          setError('An unexpected error occurred during signup.');
         }
-      } finally {
-        setIsLoading(false);
       }
     }
   };
@@ -76,8 +88,10 @@ const AuthForm: React.FC = () => {
     setError(null);
     setSuccess(null);
     
+    let verificationSucceeded = false;
+
     try {
-      const response = await fetch('/api/auth/verify-otp', {
+      const response = await fetch('/api/user/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -89,21 +103,25 @@ const AuthForm: React.FC = () => {
         throw new Error(data.message || 'OTP verification failed.');
       }
 
+      verificationSucceeded = true;
       setSuccess(data.message);
-      // Redirect after a short delay
+      
+      // ✅ CHANGED: Replaced state update with a full page refresh
       setTimeout(() => {
-        router.push('/dashboard'); 
+        window.location.reload();
       }, 2000);
 
     } catch (err) {
-      // ✅ FIX: Properly handle the error type
       if (err instanceof Error) {
         setError(err.message);
       } else {
         setError('An unexpected error occurred during OTP verification.');
       }
     } finally {
-      setIsLoading(false);
+      // On failure, re-enable the button. On success, it stays disabled until the page reloads.
+      if (!verificationSucceeded) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -127,9 +145,9 @@ const AuthForm: React.FC = () => {
                         onChange={(e) => setOtp(e.target.value)}
                         placeholder="Enter 6-digit OTP"
                         required
+                        maxLength={6}
                         className="text-black w-full rounded-md border border-gray-300 px-3 py-2 placeholder:text-gray-500 focus:border-[#087b08] focus:ring-1 focus:ring-[#087b08]"
                     />
-                    {/* Feedback Messages */}
                     {error && <p className="text-sm text-red-600">{error}</p>}
                     {success && <p className="text-sm text-green-600">{success}</p>}
                     <button
@@ -139,6 +157,11 @@ const AuthForm: React.FC = () => {
                     >
                         {isLoading ? "Verifying..." : "Verify Account"}
                     </button>
+                    <p className="text-center text-sm">
+                        <button type="button" onClick={handleToggleForm} className="text-[#087b08] hover:underline">
+                            Back to Sign Up
+                        </button>
+                    </p>
                 </form>
             </div>
         </div>
@@ -167,7 +190,6 @@ const AuthForm: React.FC = () => {
 
         <div className="rounded-lg bg-white p-8 shadow-lg">
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Name field only for Sign Up */}
             {!isLogin && (
               <input
                 type="text"
@@ -204,7 +226,6 @@ const AuthForm: React.FC = () => {
               </div>
             )}
             
-            {/* Feedback Messages */}
             {error && <p className="text-sm text-red-600">{error}</p>}
             {success && <p className="text-sm text-green-600">{success}</p>}
 

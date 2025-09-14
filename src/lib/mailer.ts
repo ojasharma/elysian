@@ -19,7 +19,7 @@ export const sendOtpEmail = async (email: string, otp: string) => {
   console.log('SMTP_USER:', process.env.SMTP_USER);
     try {
         const mailOptions = {
-            from: `Your App Name <${process.env.SMTP_USER}>`,
+            from: `Elysian <${process.env.SMTP_USER}>`,
             to: email,
             subject: 'Your Verification Code',
             html: `
