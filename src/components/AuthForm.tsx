@@ -2,29 +2,27 @@
 
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation'; 
-import { signIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react'; 
 
-// Import the new modular components
 import LoginForm from "./LoginForm";
 import SignUpForm from "./SignUpForm";
 import OtpForm from "./OtpForm";
 import SocialLogins from "./SocialLogins";
 
 const AuthForm: React.FC = () => {
+  // All your existing state and logic is correct and stays the same
   const [isLogin, setIsLogin] = useState(true);
   const [showOtpInput, setShowOtpInput] = useState(false);
   const router = useRouter(); 
-
-  // All state and logic remains in the parent component
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // All your handler functions are also correct and stay the same
   const handleToggleForm = () => {
     setIsLogin(!isLogin);
     setError(null);
@@ -102,7 +100,7 @@ const AuthForm: React.FC = () => {
     }
   };
 
-  // --- Render logic is now much cleaner ---
+
   if (showOtpInput) {
     return (
       <OtpForm
@@ -118,9 +116,11 @@ const AuthForm: React.FC = () => {
     );
   }
 
+  // ✅ THIS IS THE FIX. No more flex, no more min-h-screen.
+  // The component simply renders the form in a simple container.
   return (
-    <div className="flex items-center justify-center p-4 font-inter">
-      <div className="w-full max-w-md space-y-8">
+    <div className="w-full max-w-md font-inter">
+      <div className="rounded-lg bg-white p-8 shadow-lg space-y-6">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">
             {isLogin ? "Sign in to your account" : "Create a new account"}
@@ -136,34 +136,33 @@ const AuthForm: React.FC = () => {
           </p>
         </div>
 
-        <div className="rounded-lg bg-white p-8 shadow-lg">
-          {isLogin ? (
-            <LoginForm
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              isLoading={isLoading}
-              error={error}
-              success={success}
-              onSubmit={handleSubmit}
-            />
-          ) : (
-            <SignUpForm
-              name={name}
-              setName={setName}
-              email={email}
-              setEmail={setEmail}
-              password={password}
-              setPassword={setPassword}
-              isLoading={isLoading}
-              error={error}
-              success={success}
-              onSubmit={handleSubmit}
-            />
-          )}
-          <SocialLogins />
-        </div>
+        {isLogin ? (
+          <LoginForm
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            isLoading={isLoading}
+            error={error}
+            success={success}
+            onSubmit={handleSubmit}
+          />
+        ) : (
+          <SignUpForm
+            name={name}
+            setName={setName}
+            email={email}
+            setEmail={setEmail}
+            password={password}
+            setPassword={setPassword}
+            isLoading={isLoading}
+            error={error}
+            success={success}
+            onSubmit={handleSubmit}
+          />
+        )}
+
+        <SocialLogins />
       </div>
     </div>
   );

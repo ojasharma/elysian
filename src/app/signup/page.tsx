@@ -1,17 +1,19 @@
 'use client';
 
 import React from "react";
-import Header from "@/components/Header"; // ✅ Importing Header
-import AuthForm from "@/components/AuthForm"; // ✅ Better to move AuthForm too if reusable
+import Header from "@/components/Header";
+import AuthForm from "@/components/AuthForm";
 
-// --- MAIN PAGE ---
 export default function Page() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="flex flex-col min-h-screen bg-gray-100">
       <Header />
-      <div className="flex items-center justify-center py-12">
-        <AuthForm />
-      </div>
+      <main className="flex flex-grow items-center justify-center p-4">
+        {/* ✅ Increased the bottom margin again */}
+        <div className="mb-64">
+          <AuthForm />
+        </div>
+      </main>
     </div>
   );
 }
