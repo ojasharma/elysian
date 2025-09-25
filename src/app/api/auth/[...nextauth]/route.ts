@@ -1,5 +1,7 @@
-import NextAuth, { DefaultSession, NextAuthOptions } from "next-auth";
-import { JWT } from "next-auth/jwt";
+import NextAuth, { NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -7,7 +9,21 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
+  // ✅ Configure Prisma Adapter
+  adapter: PrismaAdapter(prisma),
+
   providers: [
+    // ✅ Add Google Provider
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+    // ✅ Add Facebook Provider
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+    }),
+    // Your existing Credentials Provider
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -18,29 +34,23 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           throw new Error("Invalid credentials");
         }
-
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
-
+        // Use your custom 'isVerified' field here
         if (!user.isVerified) {
           throw new Error("Please verify your email before signing in.");
         }
-
         const isPasswordCorrect = await bcrypt.compare(
           credentials.password,
           user.password
         );
-
         if (!isPasswordCorrect) {
           throw new Error("Invalid credentials");
         }
-
-        // Return user object without the password
         return {
           id: user.id,
           name: user.name,
@@ -50,25 +60,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/login", // Make sure this path points to your actual login page
+    signIn: "/signin", // Your sign-in page path
   },
   session: {
     strategy: "jwt",
   },
   callbacks: {
     async jwt({ token, user }) {
-      // On the first sign-in, the user object is available.
-      // Persist the user ID to the token.
       if (user) {
         token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
-      // Pass the user ID from the token to the session object.
-      // ✅ FIX: No more 'as any'. TypeScript now knows about session.user.id
       if (token && session.user) {
-        session.user.id = token.id;
+        (session.user as any).id = token.id as string;
       }
       return session;
     },
