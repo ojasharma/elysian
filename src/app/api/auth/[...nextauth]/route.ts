@@ -1,6 +1,6 @@
 // src/app/api/auth/[...nextauth]/route.ts
 
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions, User } from "next-auth"; // Import User type
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
 import FacebookProvider from "next-auth/providers/facebook";
@@ -11,21 +11,17 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
-  // ✅ Configure Prisma Adapter
   adapter: PrismaAdapter(prisma),
 
   providers: [
-    // ✅ Add Google Provider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-    // ✅ Add Facebook Provider
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID!,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
     }),
-    // Your existing Credentials Provider
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -42,7 +38,6 @@ export const authOptions: NextAuthOptions = {
         if (!user || !user.password) {
           throw new Error("Invalid credentials");
         }
-        // Use your custom 'isVerified' field here
         if (!user.isVerified) {
           throw new Error("Please verify your email before signing in.");
         }
@@ -62,15 +57,13 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/signin", // Your sign-in page path
+    signIn: "/signin",
   },
   session: {
     strategy: "jwt",
   },
-  // ✅ ENABLE DEBUG MODE
   debug: true,
   callbacks: {
-    // ✅ ADD LOGGING TO JWT CALLBACK
     async jwt({ token, user, account }) {
       console.log("--- JWT Callback ---");
       console.log("Token:", token);
@@ -82,15 +75,14 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    // ✅ ADD LOGGING TO SESSION CALLBACK
-    async session({ session, token, user }) {
+    async session({ session, token }) {
       console.log("--- Session Callback ---");
       console.log("Session:", session);
       console.log("Token:", token);
-      console.log("User:", user);
       console.log("------------------------");
       if (token && session.user) {
-        (session.user as any).id = token.id as string;
+        // ✅ FIX: Properly type the user object before assigning the id
+        (session.user as User & { id: string }).id = token.id as string;
       }
       return session;
     },

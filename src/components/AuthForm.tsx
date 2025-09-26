@@ -1,8 +1,10 @@
+// src/components/AuthForm.tsx
+
 'use client';
 
 import React, { useState } from "react";
-import { useRouter } from 'next/navigation'; 
-import { signIn } from 'next-auth/react'; 
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 import LoginForm from "./LoginForm";
 import SignUpForm from "./SignUpForm";
@@ -10,10 +12,9 @@ import OtpForm from "./OtpForm";
 import SocialLogins from "./SocialLogins";
 
 const AuthForm: React.FC = () => {
-  // All your existing state and logic is correct and stays the same
   const [isLogin, setIsLogin] = useState(true);
   const [showOtpInput, setShowOtpInput] = useState(false);
-  const router = useRouter(); 
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +23,6 @@ const AuthForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  // All your handler functions are also correct and stay the same
   const handleToggleForm = () => {
     setIsLogin(!isLogin);
     setError(null);
@@ -46,15 +46,17 @@ const AuthForm: React.FC = () => {
 
         if (result?.error) setError(result.error);
         else if (result?.ok) router.push('/test');
-        
+
       } catch (err) {
+        // ✅ FIX: The 'err' variable is now used
+        console.error("Login submission error:", err);
         setError("An unexpected error occurred during login.");
       } finally {
         setIsLoading(false);
       }
     } else {
       setShowOtpInput(true);
-      setIsLoading(false); 
+      setIsLoading(false);
 
       try {
         const response = await fetch('/api/user/signup', {
@@ -77,7 +79,7 @@ const AuthForm: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setSuccess(null);
-    
+
     let verificationSucceeded = false;
     try {
       const response = await fetch('/api/user/verify-otp', {
@@ -90,7 +92,7 @@ const AuthForm: React.FC = () => {
 
       verificationSucceeded = true;
       setSuccess(data.message);
-      
+
       setTimeout(() => { window.location.reload(); }, 2000);
     } catch (err) {
       if (err instanceof Error) setError(err.message);
@@ -99,7 +101,6 @@ const AuthForm: React.FC = () => {
       if (!verificationSucceeded) setIsLoading(false);
     }
   };
-
 
   if (showOtpInput) {
     return (
@@ -116,8 +117,6 @@ const AuthForm: React.FC = () => {
     );
   }
 
-  // ✅ THIS IS THE FIX. No more flex, no more min-h-screen.
-  // The component simply renders the form in a simple container.
   return (
     <div className="w-full max-w-md font-inter">
       <div className="rounded-lg bg-white p-8 shadow-lg space-y-6">
