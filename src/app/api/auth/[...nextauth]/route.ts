@@ -1,3 +1,5 @@
+// src/app/api/auth/[...nextauth]/route.ts
+
 import NextAuth, { NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import GoogleProvider from "next-auth/providers/google";
@@ -65,14 +67,28 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+  // ✅ ENABLE DEBUG MODE
+  debug: true,
   callbacks: {
-    async jwt({ token, user }) {
+    // ✅ ADD LOGGING TO JWT CALLBACK
+    async jwt({ token, user, account }) {
+      console.log("--- JWT Callback ---");
+      console.log("Token:", token);
+      console.log("User:", user);
+      console.log("Account:", account);
+      console.log("--------------------");
       if (user) {
         token.id = user.id;
       }
       return token;
     },
-    async session({ session, token }) {
+    // ✅ ADD LOGGING TO SESSION CALLBACK
+    async session({ session, token, user }) {
+      console.log("--- Session Callback ---");
+      console.log("Session:", session);
+      console.log("Token:", token);
+      console.log("User:", user);
+      console.log("------------------------");
       if (token && session.user) {
         (session.user as any).id = token.id as string;
       }
